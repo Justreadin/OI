@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Gmail — Opportunity Intelligence</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-header">
+        <a href="/" class="nav-brand">
+            <span class="brand-mark">OI</span>
+            <span class="brand-name">Opportunity Intelligence</span>
+        </a>
+        <span class="nav-status"><span class="status-dot"></span>Private</span>
+    </div>
+    <div class="nav-tabs">
+        <a href="/" class="nav-link">Briefing</a>
+        <a href="/?view=all" class="nav-link">Opportunities</a>
+        <a href="/candidate-profile" class="nav-link">Profile</a>
+        <a href="/settings" class="nav-link">Settings</a>
+        <a href="/gmail" class="nav-link active">Gmail</a>
+    </div>
+</nav>
+
+<main class="main">
+
+    <header class="page-head">
+        <span class="overline">Account integration / Gmail</span>
+        <h1>Your application<br><span class="text-muted">email channel.</span></h1>
+        <p>Connect your own Google account. Opportunity Intelligence requests permission to send email only. It never asks for or stores your Gmail password.</p>
+    </header>
+
+    {% if message %}
+    <div class="notice">{{message}}</div>
+    {% endif %}
+
+    <!-- Connection -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>{% if connection %}Connected{% else %}Connect Gmail{% endif %}</h2>
+        </div>
+        {% if connection %}
+        <div class="list-row">
+            <div class="list-row-main">
+                <span class="list-row-title">{{connection.email}}</span>
+                <span class="list-row-sub">Connected account</span>
+            </div>
+        </div>
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin:16px 0;">Messages sent through this integration appear in Gmail Sent. A BCC copy is created in your Inbox by default.</p>
+        <form method="post" action="/gmail/disconnect" onsubmit="return confirm('Disconnect Gmail? Existing sent records will remain.');">
+            <button class="btn btn-secondary btn-block">Disconnect account</button>
+        </form>
+        {% else %}
+        <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">Google OAuth must be configured by the workspace administrator before connecting.</p>
+        <a href="/gmail/connect" class="btn btn-primary btn-block">Connect Google account</a>
+        {% endif %}
+    </div>
+
+    <!-- History -->
+    <div class="form-card">
+        <div class="form-card-header">
+            <h2>Recent email activity</h2>
+        </div>
+        {% if history %}
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse; font-size:13px;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:1px solid var(--border);">
+                        <th style="padding:10px 8px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--text-tertiary); font-weight:500;">Sent</th>
+                        <th style="padding:10px 8px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--text-tertiary); font-weight:500;">Recipient</th>
+                        <th style="padding:10px 8px; font-family:var(--font-mono); font-size:10px; text-transform:uppercase; color:var(--text-tertiary); font-weight:500;">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in history %}
+                    <tr style="border-bottom:1px solid var(--border);">
+                        <td style="padding:10px 8px; color:var(--text-secondary); white-space:nowrap;">{{item.sent_at}}</td>
+                        <td style="padding:10px 8px; color:var(--text); overflow-wrap:anywhere;">{{item.recipient}}</td>
+                        <td style="padding:10px 8px;">
+                            <span class="status-badge status-{{item.status}}">{{item.status|upper}}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p class="empty-text" style="padding:16px 0;">No application emails have been sent from this workspace.</p>
+        {% endif %}
+    </div>
+
+    <p style="font-size:12px; color:var(--text-tertiary); line-height:1.6; padding:16px; border:1px dashed var(--border); border-radius:var(--radius-md);">Security: OAuth token encrypted at rest. Use HTTPS in production, keep the client secret and encryption key outside the repository, and restrict access to this private workspace.</p>
+
+</main>
+
+</body>
+</html>

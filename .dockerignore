@@ -1,0 +1,13 @@
+.git
+.gitignore
+.env
+.venv
+venv
+__pycache__
+*.pyc
+*.db
+*.sqlite
+*.sqlite3
+browser_sessions
+candidate_assets
+.pytest_cache

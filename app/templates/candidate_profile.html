@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Candidate Profile — Opportunity Intelligence</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-header">
+        <a href="/" class="nav-brand">
+            <span class="brand-mark">OI</span>
+            <span class="brand-name">Opportunity Intelligence</span>
+        </a>
+        <span class="nav-status"><span class="status-dot"></span>Private</span>
+    </div>
+    <div class="nav-tabs">
+        <a href="/" class="nav-link">Briefing</a>
+        <a href="/?view=all" class="nav-link">Opportunities</a>
+        <a href="/candidate-profile" class="nav-link active">Profile</a>
+        <a href="/settings" class="nav-link">Settings</a>
+        <a href="/gmail" class="nav-link">Gmail</a>
+    </div>
+</nav>
+
+<main class="main">
+
+    <header class="page-head">
+        <span class="overline">Candidate intelligence / Source of truth</span>
+        <h1>Build your<br><span class="text-muted">professional record.</span></h1>
+        <p>This profile gives the system structured context for matching opportunities and preparing application materials. Add only accurate information.</p>
+    </header>
+
+    {% if request.query_params.get('saved') %}
+    <div class="notice notice-success">Profile saved · New drafts will use your updated details.</div>
+    {% endif %}
+
+    <form method="post" action="/candidate-profile" style="display:flex; flex-direction:column; gap:12px;">
+
+        <!-- IDENTITY -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">01 / Identity & contact</span>
+            </div>
+            <div class="field">
+                <label>Full name</label>
+                <input name="name" value="{{candidate.name}}" required>
+            </div>
+            <div class="field">
+                <label>Professional headline</label>
+                <input name="headline" value="{{candidate.headline}}">
+            </div>
+            <div class="field">
+                <label>Email</label>
+                <input type="email" name="email" value="{{candidate.email}}">
+            </div>
+            <div class="field">
+                <label>Phone</label>
+                <input name="phone" value="{{candidate.phone}}">
+            </div>
+            <div class="field">
+                <label>Current location</label>
+                <input name="location" value="{{candidate.location}}">
+            </div>
+            <div class="field">
+                <label>Portfolio / website</label>
+                <input name="website" value="{{candidate.website}}">
+            </div>
+            <div class="field">
+                <label>LinkedIn URL</label>
+                <input name="linkedin" value="{{candidate.linkedin}}" placeholder="Add only if you have one">
+            </div>
+            <div class="field">
+                <label>GitHub URL</label>
+                <input name="github" value="{{candidate.github}}">
+            </div>
+        </div>
+
+        <!-- SUMMARY -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">02 / Professional summary</span>
+            </div>
+            <div class="field">
+                <label>Summary / career narrative</label>
+                <textarea name="summary" placeholder="Your professional story, strengths and direction...">{{candidate.summary}}</textarea>
+            </div>
+            <div class="field">
+                <label>Skills and tools</label>
+                <textarea name="skills" placeholder="Separate skills with commas or lines.">{{candidate.skills}}</textarea>
+            </div>
+            <div class="field">
+                <label>Languages</label>
+                <textarea name="languages" placeholder="Language and proficiency">{{candidate.languages}}</textarea>
+            </div>
+            <div class="field">
+                <label>Career interests</label>
+                <textarea name="career_interests" placeholder="Roles, sectors, functions you want">{{candidate.career_interests}}</textarea>
+            </div>
+        </div>
+
+        <!-- EVIDENCE -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">03 / Experience & evidence</span>
+            </div>
+            <p style="font-size:12px; color:var(--text-tertiary); line-height:1.6; margin-bottom:16px;">Use organisation, role, dates, responsibilities, outcomes and your exact contribution. Separate personal results from team-level metrics.</p>
+            <div class="field">
+                <label>Education details</label>
+                <textarea name="education_notes" placeholder="Institution, programme, dates, current status...">{{candidate.education_notes}}</textarea>
+            </div>
+            <div class="field">
+                <label>Employment / role history</label>
+                <textarea name="experience_notes" placeholder="Role, organisation, dates, responsibilities...">{{candidate.experience_notes}}</textarea>
+            </div>
+            <div class="field">
+                <label>Projects and products</label>
+                <textarea name="project_notes" placeholder="What you built, your role, technology, users...">{{candidate.project_notes}}</textarea>
+            </div>
+            <div class="field">
+                <label>Achievements and quantified outcomes</label>
+                <textarea name="achievements" placeholder="Metric, timeframe, baseline, your contribution...">{{candidate.achievements}}</textarea>
+            </div>
+            <div class="field">
+                <label>Additional context</label>
+                <textarea name="additional_context" placeholder="Other factual context">{{candidate.additional_context}}</textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/settings" class="btn-link">← Settings</a>
+            <button class="btn btn-primary btn-block">Save candidate profile</button>
+        </div>
+
+    </form>
+
+</main>
+
+</body>
+</html>

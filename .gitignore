@@ -1,0 +1,14 @@
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+candidate_assets/
+browser_sessions/
+*.sqlite3
+*.log
+data/
+*.db
+candidate_assets/
+browser_sessions/
+service-account*.json

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Settings — Opportunity Intelligence</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<nav class="nav">
+    <div class="nav-header">
+        <a href="/" class="nav-brand">
+            <span class="brand-mark">OI</span>
+            <span class="brand-name">Opportunity Intelligence</span>
+        </a>
+        <span class="nav-status"><span class="status-dot"></span>Private</span>
+    </div>
+    <div class="nav-tabs">
+        <a href="/" class="nav-link">Briefing</a>
+        <a href="/?view=all" class="nav-link">Opportunities</a>
+        <a href="/candidate-profile" class="nav-link">Profile</a>
+        <a href="/settings" class="nav-link active">Settings</a>
+        <a href="/gmail" class="nav-link">Gmail</a>
+    </div>
+</nav>
+
+<main class="main">
+
+    <header class="page-head">
+        <span class="overline">Configuration / Search rules</span>
+        <h1>Set the terms<br><span class="text-muted">of your search.</span></h1>
+        <p>Tell the system what is worth pursuing. It will apply these rules automatically before opportunities reach your shortlist.</p>
+    </header>
+
+    {% if request.query_params.get('saved') %}
+    <div class="notice notice-success">Preferences saved · Your next discovery run will use these rules.</div>
+    {% endif %}
+
+    <a href="/candidate-profile" class="btn btn-secondary btn-block">Edit candidate profile →</a>
+
+    <form method="post" action="/settings" style="display:flex; flex-direction:column; gap:12px;">
+
+        <!-- FIT THRESHOLD -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">01 / Fit threshold</span>
+                <h2>How selective should the radar be?</h2>
+            </div>
+            <div class="field">
+                <label>Minimum role-fit score: <span style="color:var(--text); font-weight:600;" id="scoreValue">{{preferences.minimum_fit_score}}</span></label>
+                <input type="range" min="30" max="95" step="5" name="minimum_fit_score" value="{{preferences.minimum_fit_score}}" oninput="document.getElementById('scoreValue').textContent=this.value" style="padding:0; min-height:auto; accent-color:var(--accent);">
+            </div>
+            <p style="font-size:12px; color:var(--text-tertiary); line-height:1.6; margin-top:8px;">The score is a transparent heuristic based on career track, seniority, role language and location signals. It is not an AI guarantee of suitability.</p>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Automatic shortlist</span>
+                    <span class="toggle-row-desc">Only show roles above your score threshold, not applied to, discovered in the last 14 days.</span>
+                </div>
+                <input type="checkbox" name="auto_shortlist" {% if preferences.auto_shortlist %}checked{% endif %}>
+            </div>
+        </div>
+
+        <!-- LOCATION -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">02 / Location & work authorisation</span>
+                <h2>Where can you work?</h2>
+            </div>
+            <p style="font-size:13px; color:var(--text-secondary); line-height:1.6; margin-bottom:16px;">These choices control filtering. The system will never infer your legal work authorisation or answer sponsorship questions on your behalf.</p>
+
+            <div style="background:var(--bg); border:1px solid var(--border); border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
+                <span class="overline-sm">Your optional work-permission profile</span>
+                <div class="field">
+                    <label>Country where you live</label>
+                    <input type="text" name="residence_country" value="{{preferences.residence_country}}" placeholder="e.g. Nigeria">
+                </div>
+                <div class="field">
+                    <label>Citizenship (optional)</label>
+                    <input type="text" name="citizenship" value="{{preferences.citizenship}}" placeholder="e.g. Nigerian">
+                </div>
+                <div class="field">
+                    <label>Current status (optional)</label>
+                    <select name="immigration_status">
+                        <option value="not_specified" {% if preferences.immigration_status=='not_specified' %}selected{% endif %}>Prefer not to specify</option>
+                        <option value="citizen" {% if preferences.immigration_status=='citizen' %}selected{% endif %}>Citizen</option>
+                        <option value="permanent_resident" {% if preferences.immigration_status=='permanent_resident' %}selected{% endif %}>Permanent resident</option>
+                        <option value="work_permit" {% if preferences.immigration_status=='work_permit' %}selected{% endif %}>Work permit</option>
+                        <option value="temporary_visa" {% if preferences.immigration_status=='temporary_visa' %}selected{% endif %}>Temporary visa</option>
+                        <option value="student_visa" {% if preferences.immigration_status=='student_visa' %}selected{% endif %}>Student visa</option>
+                        <option value="no_work_authorisation" {% if preferences.immigration_status=='no_work_authorisation' %}selected{% endif %}>No work authorisation</option>
+                        <option value="other" {% if preferences.immigration_status=='other' %}selected{% endif %}>Other</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>How should work-authorisation be treated?</label>
+                    <select name="work_authorisation_mode">
+                        <option value="any" {% if preferences.work_authorisation_mode=='any' %}selected{% endif %}>Show all; flag for review</option>
+                        <option value="authorised_only" {% if preferences.work_authorisation_mode=='authorised_only' %}selected{% endif %}>Prioritise where I have authorisation</option>
+                        <option value="sponsorship_or_authorised" {% if preferences.work_authorisation_mode=='sponsorship_or_authorised' %}selected{% endif %}>Authorisation or sponsorship</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Countries where you have work authorisation</label>
+                    <input type="text" name="authorised_countries" value="{{preferences.authorised_countries}}" placeholder="e.g. Nigeria, United Kingdom">
+                </div>
+                <div class="field">
+                    <label>Countries where you need sponsorship</label>
+                    <input type="text" name="sponsorship_countries" value="{{preferences.sponsorship_countries}}" placeholder="e.g. United States, Canada">
+                </div>
+                <div class="field">
+                    <label>Relocation preference</label>
+                    <select name="relocation_willingness">
+                        <option value="open" {% if preferences.relocation_willingness=='open' %}selected{% endif %}>Open to relocation</option>
+                        <option value="case_by_case" {% if preferences.relocation_willingness=='case_by_case' %}selected{% endif %}>Case by case</option>
+                        <option value="remote_only" {% if preferences.relocation_willingness=='remote_only' %}selected{% endif %}>Remote only</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Include visa sponsorship roles</span>
+                    <span class="toggle-row-desc">Keep international roles where the employer may sponsor.</span>
+                </div>
+                <input type="checkbox" name="include_visa_sponsorship" {% if preferences.include_visa_sponsorship %}checked{% endif %}>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Include roles requiring local work authorisation</span>
+                    <span class="toggle-row-desc">Keep roles asking for existing work permission.</span>
+                </div>
+                <input type="checkbox" name="include_roles_requiring_local_work_authorisation" {% if preferences.include_roles_requiring_local_work_authorisation %}checked{% endif %}>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Include geographically restricted roles</span>
+                    <span class="toggle-row-desc">Keep roles limited to a country outside Nigeria.</span>
+                </div>
+                <input type="checkbox" name="include_location_restricted_roles" {% if preferences.include_location_restricted_roles %}checked{% endif %}>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Include hybrid or on-site roles outside Nigeria</span>
+                    <span class="toggle-row-desc">Useful if you are willing to relocate.</span>
+                </div>
+                <input type="checkbox" name="include_hybrid_onsite_outside_nigeria" {% if preferences.include_hybrid_onsite_outside_nigeria %}checked{% endif %}>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Keep unclear geography in review queue</span>
+                    <span class="toggle-row-desc">Do not silently discard remote jobs without country eligibility.</span>
+                </div>
+                <input type="checkbox" name="include_unverified_geography" {% if preferences.include_unverified_geography %}checked{% endif %}>
+            </div>
+            <div class="toggle-row">
+                <div class="toggle-row-text">
+                    <span class="toggle-row-title">Show stale listings</span>
+                    <span class="toggle-row-desc">Keep listings not seen in more than 14 days.</span>
+                </div>
+                <input type="checkbox" name="show_stale" {% if preferences.show_stale %}checked{% endif %}>
+            </div>
+        </div>
+
+        <!-- CAREER TRACKS -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">03 / Career tracks</span>
+                <h2>What work is worth finding?</h2>
+            </div>
+            <div class="choice-grid">
+                {% for t in tracks %}
+                <label class="choice-item">
+                    <input type="checkbox" name="tracks" value="{{t}}" {% if t in preferences.tracks %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">{{t}}</span>
+                    </span>
+                </label>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- WORKSPACE -->
+        <div class="form-card">
+            <div class="form-card-header">
+                <span class="overline-sm">04 / Workspace</span>
+                <h2>Choose your working environment.</h2>
+            </div>
+            <div class="choice-grid">
+                <label class="choice-item">
+                    <input type="radio" name="display_mode" value="auto" {% if preferences.display_mode=='auto' %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">Adaptive</span>
+                        <span class="choice-item-desc">Use mobile or desktop layout based on screen size.</span>
+                    </span>
+                </label>
+                <label class="choice-item">
+                    <input type="radio" name="display_mode" value="mobile" {% if preferences.display_mode=='mobile' %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">Mobile</span>
+                        <span class="choice-item-desc">Compact, phone-first cards.</span>
+                    </span>
+                </label>
+                <label class="choice-item">
+                    <input type="radio" name="display_mode" value="desktop" {% if preferences.display_mode=='desktop' %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">Desktop</span>
+                        <span class="choice-item-desc">Expanded briefing and wider radar.</span>
+                    </span>
+                </label>
+            </div>
+
+            <h3 style="font-size:14px; font-weight:600; margin:20px 0 12px;">Application submission mode</h3>
+            <div class="choice-grid">
+                <label class="choice-item">
+                    <input type="radio" name="default_submit_mode" value="manual" {% if preferences.default_submit_mode=='manual' %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">Manual / apply pack</span>
+                        <span class="choice-item-desc">Prepare documents, submit yourself.</span>
+                    </span>
+                </label>
+                <label class="choice-item">
+                    <input type="radio" name="default_submit_mode" value="assisted" {% if preferences.default_submit_mode=='assisted' %}checked{% endif %}>
+                    <span class="choice-item-text">
+                        <span class="choice-item-title">Assisted (opt-in)</span>
+                        <span class="choice-item-desc">Browser-assisted form completion. Final submission still requires explicit authorization.</span>
+                    </span>
+                </label>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <a href="/" class="btn-link">← Return to briefing</a>
+            <button class="btn btn-primary btn-block">Save preferences</button>
+        </div>
+
+    </form>
+
+</main>
+
+</body>
+</html>

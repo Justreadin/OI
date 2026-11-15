@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#000000">
+    <title>Opportunity Intelligence</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<nav class="nav">
+    <div class="nav-header">
+        <a href="/" class="nav-brand">
+            <span class="brand-mark">OI</span>
+            <span class="brand-name">Opportunity Intelligence</span>
+        </a>
+        <span class="nav-status"><span class="status-dot"></span>Private</span>
+    </div>
+    <div class="nav-tabs">
+        <a href="/" class="nav-link active">Briefing</a>
+        <a href="/?view=all" class="nav-link">Opportunities</a>
+        <a href="/candidate-profile" class="nav-link">Profile</a>
+        <a href="/settings" class="nav-link">Settings</a>
+        <a href="/gmail" class="nav-link">Gmail</a>
+    </div>
+</nav>
+
+<main class="main">
+
+    <!-- HERO -->
+    <header class="hero">
+        <span class="overline">Field Desk 01 / Career Intelligence</span>
+        <h1 class="hero-title">Good work is<br><span class="text-muted">worth finding.</span></h1>
+        <p class="hero-subtitle">A considered view of the opportunities that fit, the applications that need attention, and the next best action.</p>
+        <div class="hero-actions">
+            <form id="scanForm" action="/scan" method="post">
+                <button type="submit" class="btn btn-primary" style="width:100%;" id="scanButton">Run Discovery</button>
+            </form>
+            <a href="/settings" class="btn btn-secondary" style="width:100%;">Tune Preferences</a>
+        </div>
+    </header>
+
+    <!-- META BAR -->
+    <div class="meta-bar">
+        <span class="meta-item"><span class="meta-label">Last scan</span><span class="meta-value">{% if last_run %}{{last_run.finished_at or last_run.started_at}}{% else %}Never{% endif %}</span></span>
+        <span class="meta-item"><span class="meta-label">Indexed</span><span class="meta-value">{{stats.jobs}}</span></span>
+        <span class="meta-item"><span class="meta-label">Shortlist</span><span class="meta-value">{{stats.shortlist}}</span></span>
+        <span class="meta-item"><span class="meta-label">Stale</span><span class="meta-value">{{stats.stale}}</span></span>
+    </div>
+
+    <!-- 01 / BRIEFING -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <span class="overline">01 / The Briefing</span>
+                <h2 class="section-title">What needs your attention.</h2>
+            </div>
+        </div>
+
+        <div class="briefing-grid">
+            <a href="/?view=shortlist#radar" class="briefing-card">
+                <div class="briefing-card-top">
+                    <span class="briefing-label">Needs Review</span>
+                    <span class="briefing-num">{{stats.shortlist}}</span>
+                </div>
+                <p class="briefing-desc">High-confidence opportunities that meet your rules.</p>
+                <span class="briefing-link">Review shortlist →</span>
+            </a>
+
+            <a href="#pipeline" class="briefing-card">
+                <div class="briefing-card-top">
+                    <span class="briefing-label">Awaiting Approval</span>
+                    <span class="briefing-num">{{stats.drafts}}</span>
+                </div>
+                <p class="briefing-desc">Application drafts waiting for your review.</p>
+                <span class="briefing-link">Review drafts →</span>
+            </a>
+
+            <a href="#pipeline" class="briefing-card">
+                <div class="briefing-card-top">
+                    <span class="briefing-label">Verify Submission</span>
+                    <span class="briefing-num">{{stats.pending}}</span>
+                </div>
+                <p class="briefing-desc">Applications needing final confirmation.</p>
+                <span class="briefing-link">Check status →</span>
+            </a>
+        </div>
+    </section>
+
+    <!-- 02 / RADAR -->
+    <section class="section" id="radar">
+        <div class="section-header" style="flex-direction: row; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <span class="overline">02 / The Radar</span>
+                <h2 class="section-title">Worth your attention.</h2>
+            </div>
+            <span class="count-badge">{{ jobs|length }} / {{stats.jobs}}</span>
+        </div>
+
+        <!-- Filters -->
+        <details class="filter-drawer">
+            <summary>Filter the radar <span>+</span></summary>
+            <form class="filter-form" method="get">
+                <input type="hidden" name="view" value="{{view}}">
+                <input type="text" name="qtext" value="{{query}}" placeholder="Search roles..." class="input">
+                <select name="track" class="input">
+                    <option value="">All tracks</option>
+                    {% for t in tracks %}
+                    <option value="{{t}}" {% if selected_track==t %}selected{% endif %}>{{t}}</option>
+                    {% endfor %}
+                </select>
+                <button type="submit" class="btn btn-secondary">Apply Filters</button>
+            </form>
+        </details>
+
+        <!-- Opportunity List -->
+        <div class="opportunity-list">
+            {% for j in jobs %}
+            <article class="opportunity-row">
+                <div class="opp-score">
+                    <span class="opp-score-num">{{'%.0f'|format(j.score)}}</span>
+                    <span class="opp-score-label">FIT</span>
+                </div>
+                <div class="opp-main">
+                    <div class="opp-meta-top">
+                        <span class="opp-company">{{j.company}}</span>
+                        <span class="opp-source">via {{j.source}}</span>
+                    </div>
+                    <h3 class="opp-title"><a href="/job/{{j.id}}">{{j.title}}</a></h3>
+                    <div class="opp-tags">
+                        <span class="tag">{{j.track}}</span>
+                        <span class="tag">{{j.location}}</span>
+                        <span class="tag tag-{{j.eligibility}}">{% if j.eligibility=='likely' %}NG / Africa{% elif j.eligibility=='verify' %}Verify{% else %}Ineligible{% endif %}</span>
+                    </div>
+                </div>
+                <div class="opp-actions">
+                    <a href="/job/{{j.id}}" class="btn btn-secondary btn-sm" style="width:100%;">Inspect</a>
+                    <span class="opp-state">{{j.application.status|replace('_',' ')|upper if j.application else 'NEW'}}</span>
+                </div>
+            </article>
+            {% else %}
+            <div class="empty-state" style="padding:32px 16px; background:var(--bg);">
+                <h3>{% if not documents %}Start with your source CV.{% else %}No roles match.{% endif %}</h3>
+                <p>{% if not documents %}Upload your CV, then run discovery.{% else %}Try widening the fit threshold.{% endif %}</p>
+                <a href="{% if not documents %}#assets{% else %}/settings{% endif %}" class="btn btn-primary" style="width:100%;">{% if not documents %}Upload CV{% else %}Refine Preferences{% endif %}</a>
+            </div>
+            {% endfor %}
+        </div>
+
+        <!-- PAGINATION -->
+        {% if total_pages > 1 %}
+        <nav class="pagination" aria-label="Opportunity pages">
+            <div class="pagination-summary">
+                Showing {{ (page - 1) * per_page + 1 }}–{{ [page * per_page, total_results] | min }} of {{ total_results }}
+            </div>
+            <div class="pagination-controls">
+                {% if page > 1 %}
+                    <a href="/?view={{view}}&page={{page-1}}&per_page={{per_page}}&qtext={{query|urlencode}}&track={{selected_track|urlencode}}#radar">←</a>
+                {% else %}
+                    <span class="disabled">←</span>
+                {% endif %}
+                {% for n in range([1, page-1]|max, [total_pages, page+1]|min + 1) %}
+                    <a class="{% if n==page %}current{% endif %}" href="/?view={{view}}&page={{n}}&per_page={{per_page}}&qtext={{query|urlencode}}&track={{selected_track|urlencode}}#radar">{{n}}</a>
+                {% endfor %}
+                {% if page < total_pages %}
+                    <a href="/?view={{view}}&page={{page+1}}&per_page={{per_page}}&qtext={{query|urlencode}}&track={{selected_track|urlencode}}#radar">→</a>
+                {% else %}
+                    <span class="disabled">→</span>
+                {% endif %}
+            </div>
+            <form method="get" class="page-size-form">
+                <input type="hidden" name="view" value="{{view}}">
+                <input type="hidden" name="qtext" value="{{query}}">
+                <select name="per_page" class="input input-sm" onchange="this.form.submit()" style="width:auto;">
+                    {% for n in [10, 15, 25, 50] %}
+                    <option value="{{n}}" {% if per_page==n %}selected{% endif %}>{{n}} rows</option>
+                    {% endfor %}
+                </select>
+            </form>
+        </nav>
+        {% endif %}
+    </section>
+
+    <!-- 03 / WORKSPACE -->
+    <section class="section" id="pipeline">
+        <div class="section-header">
+            <div>
+                <span class="overline">03 / The Workspace</span>
+                <h2 class="section-title">Everything in motion.</h2>
+            </div>
+        </div>
+
+        <div class="workspace-grid">
+            <!-- Pipeline -->
+            <div class="workspace-card">
+                <div class="workspace-card-header">
+                    <h3 class="workspace-card-title">Application Pipeline</h3>
+                </div>
+                <div class="workspace-card-body">
+                    {% for a in active_apps %}
+                    <a href="/job/{{a.job.id}}" class="workspace-item">
+                        <div class="workspace-item-main">
+                            <span class="workspace-item-title">{{a.job.company}}</span>
+                            <span class="workspace-item-sub">{{a.job.title}}</span>
+                        </div>
+                        <span class="status-badge status-{{a.status}}">{{a.status|upper}}</span>
+                    </a>
+                    {% else %}
+                    <p class="empty-text">No active applications.</p>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Assets -->
+            <div class="workspace-card" id="assets">
+                <div class="workspace-card-header">
+                    <h3 class="workspace-card-title">Asset Library</h3>
+                </div>
+                <div class="workspace-card-body">
+                    {% for d in documents[:3] %}
+                    <div class="workspace-item">
+                        <div class="workspace-item-main">
+                            <span class="workspace-item-title">{{d.original_name}}</span>
+                            <span class="workspace-item-sub">{{d.category|upper}}</span>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="empty-text">No source CV uploaded.</p>
+                    {% endfor %}
+                </div>
+                <div class="workspace-card-footer">
+                    <form action="/documents/upload" method="post" enctype="multipart/form-data" class="upload-form">
+                        <input type="hidden" name="category" value="resume">
+                        <input type="file" name="file" accept=".pdf,.docx,.txt" required class="file-input" id="cv-upload">
+                        <label for="cv-upload" class="btn btn-secondary" style="flex:1;">Choose File</label>
+                        <button type="submit" class="btn btn-primary" style="flex:1;">Upload</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Watchlist -->
+            <div class="workspace-card">
+                <div class="workspace-card-header">
+                    <h3 class="workspace-card-title">Employer Watchlist</h3>
+                </div>
+                <div class="workspace-card-body">
+                    {% for w in watches[:3] %}
+                    <a href="{{w.career_url}}" target="_blank" class="workspace-item">
+                        <div class="workspace-item-main">
+                            <span class="workspace-item-title">{{w.name}}</span>
+                        </div>
+                    </a>
+                    {% else %}
+                    <p class="empty-text">No employers tracked.</p>
+                    {% endfor %}
+                </div>
+                <div class="workspace-card-footer">
+                    <form action="/watch" method="post" class="watch-form">
+                        <input type="text" name="name" placeholder="Company name" required class="input input-sm">
+                        <input type="url" name="career_url" placeholder="https://careers..." required class="input input-sm">
+                        <button type="submit" class="btn btn-secondary">Add Employer</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 04 / EXPORTS -->
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <span class="overline">04 / Portable Records</span>
+                <h2 class="section-title">Your data, always yours.</h2>
+            </div>
+        </div>
+        <div class="export-grid">
+            <a href="/exports/opportunity-intelligence.xlsx" class="export-card">
+                <span class="export-name">Excel Workbook</span>
+                <span class="export-desc">Full Ledger</span>
+            </a>
+            <a href="/exports/opportunities.csv" class="export-card">
+                <span class="export-name">Opportunities CSV</span>
+                <span class="export-desc">Roles</span>
+            </a>
+            <a href="/exports/applications.csv" class="export-card">
+                <span class="export-name">Applications CSV</span>
+                <span class="export-desc">Records</span>
+            </a>
+        </div>
+    </section>
+
+</main>
+
+<footer class="footer">
+    <div class="footer-left">
+        <span class="footer-brand">Opportunity Intelligence</span>
+        <br>
+        <span class="footer-text">Built around evidence, not volume.</span>
+    </div>
+    <a href="/health" class="footer-link">System Status</a>
+</footer>
+
+<script>
+    const scanForm = document.getElementById('scanForm');
+    const scanBtn = document.getElementById('scanButton');
+    if (scanForm) {
+        scanForm.addEventListener('submit', () => {
+            scanBtn.textContent = 'Scanning...';
+            scanBtn.disabled = true;
+        });
+    }
+</script>
+</body>
+</html>
