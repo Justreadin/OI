@@ -1,0 +1,16 @@
+<nav class="nav">
+    <div class="nav-header">
+        <a href="/" class="nav-brand">
+            <span class="brand-mark">OI</span>
+            <span class="brand-name">Opportunity Intelligence</span>
+        </a>
+        <span class="nav-status"><span class="status-dot"></span>Private</span>
+    </div>
+    <div class="nav-tabs">
+        <a href="/" class="nav-link {% if active_page == 'briefing' %}active{% endif %}">Briefing</a>
+        <a href="/?view=all" class="nav-link {% if active_page == 'opportunities' %}active{% endif %}">Opportunities</a>
+        <a href="/candidate-profile" class="nav-link {% if active_page == 'profile' %}active{% endif %}">Profile</a>
+        <a href="/settings" class="nav-link {% if active_page == 'settings' %}active{% endif %}">Settings</a>
+        <a href="/gmail" class="nav-link {% if active_page == 'gmail' %}active{% endif %}">Gmail</a>
+    </div>
+</nav>

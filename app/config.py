@@ -1,4 +1,10 @@
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pathlib import Path
+from dotenv import load_dotenv
+
+ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+load_dotenv(ENV_FILE, override=False)
+
 class Settings(BaseSettings):
     app_env:str="development"
     secret_key:str="change-me-too"

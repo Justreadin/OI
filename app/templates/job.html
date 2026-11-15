@@ -12,299 +12,507 @@
 </head>
 <body>
 
-<nav class="nav">
-    <div class="nav-header">
-        <a href="/" class="nav-brand">
-            <span class="brand-mark">OI</span>
-            <span class="brand-name">Opportunity Intelligence</span>
-        </a>
-        <span class="nav-status"><span class="status-dot"></span>Private</span>
-    </div>
-    <div class="nav-tabs">
-        <a href="/" class="nav-link">Briefing</a>
-        <a href="/?view=all" class="nav-link active">Opportunities</a>
-        <a href="/candidate-profile" class="nav-link">Profile</a>
-        <a href="/settings" class="nav-link">Settings</a>
-        <a href="/gmail" class="nav-link">Gmail</a>
-    </div>
-</nav>
+{% include '_nav.html' %}
 
 <main class="main">
 
     <a href="/" class="back-link">← Back to radar</a>
 
     <header class="detail-head">
+        <div class="detail-meta-top">
+            <span class="tag tag-{{job.eligibility}}">{{job.eligibility|upper}}</span>
+            <span class="tag">{{job.track}}</span>
+            {% if application %}<span class="status-badge status-{{application.status}}">{{application.status|upper}}</span>{% endif %}
+        </div>
         <h1>{{job.title}}</h1>
         <div class="detail-meta">
             <span>{{job.company}}</span>
             <span class="sep">·</span>
             <span>{{job.location}}</span>
             <span class="sep">·</span>
-            <span>{{job.track}}</span>
-            <span class="sep">·</span>
-            <a href="{{job.url}}" target="_blank" rel="noopener" style="color: var(--text-secondary);">Original listing ↗</a>
+            <a href="{{job.url}}" target="_blank" rel="noopener">Original listing ↗</a>
         </div>
     </header>
 
-    <!-- 01 / ROLE INTELLIGENCE -->
-    <section class="panel">
-        <div class="panel-header">
-            <div>
-                <span class="overline-sm">01 / Role Intelligence</span>
-                <h2 class="panel-title">Preliminary fit · {{'%.0f'|format(job.score)}}/100</h2>
-            </div>
-            <span class="tag tag-{{job.eligibility}}">{{job.eligibility|upper}}</span>
+    <section class="zone">
+        <div class="zone-header">
+            <span class="overline">01 / Role Intelligence</span>
         </div>
-        <div class="panel-body">{{job.reasons}}</div>
-        <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border); font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary); text-transform: uppercase;">
-            Method: {{job.application_method|replace("_", " ")|upper}} · {{job.application_method_confidence|upper}} confidence
-        </div>
-    </section>
-
-    <!-- 02 / VACANCY BRIEF -->
-    <section class="panel">
-        <div class="panel-header">
-            <h2 class="panel-title">Vacancy brief</h2>
-        </div>
-        <div class="description">{{job.description|striptags}}</div>
-    </section>
-
-    <!-- 03 / SELECTED ASSETS -->
-    <section class="panel">
-        <div class="panel-header">
-            <span class="overline-sm">02 / Selected candidate assets</span>
-        </div>
-        <div>
-            {% for a in selected_assets %}
-            <a href="{{a.url}}" target="_blank" rel="noopener" class="list-row" style="text-decoration:none; color:inherit;">
-                <div class="list-row-main">
-                    <span class="list-row-title">{{a.label}}</span>
-                    <span class="list-row-sub">{{a.description}}</span>
+        <div class="panel">
+            <div class="panel-row">
+                <div class="stat">
+                    <span class="stat-value">{{'%.0f'|format(job.score)}}</span>
+                    <span class="stat-label">Fit / 100</span>
                 </div>
-                <span style="font-family: var(--font-mono); font-size: 11px; color: var(--text-tertiary);">↗</span>
-            </a>
-            {% endfor %}
+                <div class="stat">
+                    <span class="stat-value">{{job.application_method_confidence|upper}}</span>
+                    <span class="stat-label">Method confidence</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-value">{{job.application_method|replace('_',' ')|upper}}</span>
+                    <span class="stat-label">Channel</span>
+                </div>
+            </div>
+            <div class="panel-divider"></div>
+            <p class="panel-text">{{job.reasons}}</p>
         </div>
     </section>
 
-    <!-- 04 / APPLICATION STUDIO -->
-    <section class="panel">
-        <div class="panel-header">
-            <div>
-                <span class="overline-sm">03 / Application studio</span>
-                <h2 class="panel-title">Make the case.</h2>
-            </div>
+    <section class="zone">
+        <div class="zone-header">
+            <span class="overline">02 / Vacancy</span>
+        </div>
+        <div class="panel">
+            <div class="description">{{job.description|striptags}}</div>
+        </div>
+    </section>
+
+    <section class="zone">
+        <div class="zone-header">
+            <span class="overline">03 / Application Studio</span>
             {% if application %}
-            <span class="status-badge status-{{application.status}}">{{application.status|upper}}</span>
+            <span class="zone-badge">{{application.status|upper}}</span>
             {% endif %}
         </div>
 
         {% if not application %}
-        <p class="panel-body" style="margin-bottom: 16px;">Generate an evidence-led application package for this vacancy. Drafts use your structured profile and flag claims requiring verification.</p>
-        <form method="post" action="/job/{{job.id}}/draft">
-            <button class="btn btn-primary btn-block">Generate tailored application</button>
-        </form>
+        <div class="panel panel-centered">
+            <h3 class="panel-heading">Generate an evidence-led application.</h3>
+            <p class="panel-text">Drafts use your structured profile and flag claims requiring verification. You will review and approve before anything is submitted.</p>
+            <form method="post" action="/job/{{job.id}}/draft">
+                <button class="btn btn-primary btn-block">Generate application package</button>
+            </form>
+        </div>
         {% else %}
 
-        <div class="panel-body" style="margin-bottom: 20px;">{{application.match_report}}</div>
-
-        <!-- Form Assistant -->
-        <div style="padding-top: 16px; border-top: 1px solid var(--border);">
-            <span class="overline-sm">04 / Employer form assistant</span>
-            <h3 style="font-size: 15px; font-weight: 600; margin-bottom: 8px;">Prepare the employer form.</h3>
-            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">ATS-aware inspection for supported platforms. Browser sessions persist by employer domain. The assistant never clicks Submit.</p>
-
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px;">
-                <input id="employerUrl" type="url" value="{{workflow_url or job.url}}" class="input" placeholder="https://employer.com/careers/apply">
-                <button type="button" class="btn btn-secondary btn-block" id="inspectEmployer">Inspect application</button>
+        <div class="panel">
+            <div class="tab-bar">
+                <button class="tab active" data-tab="draft">Edit draft</button>
+                <button class="tab" data-tab="audit">Audit</button>
+                <button class="tab" data-tab="form">Employer form</button>
             </div>
 
-            <div id="workflowStage" class="notice" hidden></div>
-            <div id="formInspector" style="font-size: 13px; color: var(--text-tertiary); padding: 16px; border: 1px dashed var(--border); border-radius: var(--radius-md); text-align: center;">No employer form inspected yet.</div>
-
-            <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 16px;">
-                <button type="button" class="btn btn-secondary btn-block" id="auditApplication">Run completeness audit</button>
-                <a class="btn btn-secondary btn-block" href="/application/{{application.id}}/audit" target="_blank">Open audit JSON</a>
-                <button type="button" class="btn btn-primary btn-block" id="fillEmployer" disabled>Fill selected fields · do not submit</button>
-                <button type="button" class="btn btn-secondary btn-block" id="fillContinue" disabled hidden>Fill + continue to next step</button>
+            <div class="tab-panel active" data-panel="draft">
+                <div class="draft-meta">
+                    <span class="meta-chip">{{application.match_report|truncate(120)}}</span>
+                </div>
+                {% if application.status == 'draft' %}
+                <form method="post" action="/application/{{application.id}}/save" class="form-stack">
+                    <div class="field">
+                        <label>Tailored CV / evidence</label>
+                        <textarea name="cv_text" rows="16">{{application.cv_text}}</textarea>
+                    </div>
+                    <div class="field">
+                        <label>Cover letter / email</label>
+                        <textarea name="cover_letter" rows="14">{{application.cover_letter}}</textarea>
+                    </div>
+                    <div class="draft-actions">
+                        <button class="btn btn-secondary btn-block">Save changes</button>
+                    </div>
+                </form>
+                <form method="post" action="/application/{{application.id}}/approve" onsubmit="return confirm('Approve this package? This records approval only. It does not submit externally.');" class="draft-actions" style="margin-top:8px;">
+                    <button class="btn btn-primary btn-block">Approve this application</button>
+                </form>
+                {% else %}
+                <div class="draft-readonly">
+                    <div class="field">
+                        <label>Tailored CV / evidence</label>
+                        <div class="readonly-block">{{application.cv_text}}</div>
+                    </div>
+                    <div class="field">
+                        <label>Cover letter / email</label>
+                        <div class="readonly-block">{{application.cover_letter}}</div>
+                    </div>
+                </div>
+                {% endif %}
             </div>
 
-            <div id="fillResult" class="notice" hidden style="margin-top: 16px;"></div>
-
-            {% if application.status=='approved' %}
-            <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);" id="finalSubmissionControls" hidden>
-                <span class="overline-sm">Explicit final authorization</span>
-                <input id="submissionAuthorization" class="input" placeholder="I AUTHORIZE THIS APPLICATION TO BE SUBMITTED" style="margin-bottom: 8px;">
-                <button type="button" class="btn btn-primary btn-block" id="submitExternal" disabled>Confirm & submit application</button>
-                <p style="font-size: 11px; color: var(--text-tertiary); margin-top: 8px; line-height: 1.5;">This sends the application to the employer. Check every answer and attachment first. CAPTCHA and security checks are never bypassed.</p>
+            <div class="tab-panel" data-panel="audit">
+                <p class="panel-text">Run a completeness and consistency audit before approval. This checks required fields, missing information, evidence gaps, and unverified claims.</p>
+                <div class="audit-actions">
+                    <button class="btn btn-secondary btn-block" id="auditApplication">Run completeness audit</button>
+                    <a class="btn btn-secondary btn-block" href="/application/{{application.id}}/audit" target="_blank">Open audit JSON</a>
+                </div>
+                <div id="auditResult" class="audit-result" hidden></div>
             </div>
-            {% endif %}
+
+            <div class="tab-panel" data-panel="form">
+                <p class="panel-text">ATS-aware inspection of the employer form. Browser sessions persist by domain. The assistant never clicks Submit.</p>
+
+                <div class="field">
+                    <label>Employer form URL</label>
+                    <input id="employerUrl" type="url" value="{{workflow_url or job.url}}" class="input" placeholder="https://employer.com/careers/apply">
+                </div>
+
+                <div class="form-actions-stack">
+                    <button type="button" class="btn btn-primary btn-block" id="inspectEmployer">Inspect application form</button>
+                </div>
+
+                <div id="workflowStage" class="notice" hidden></div>
+
+                <div id="formInspector" class="form-inspector" hidden>
+                    <div class="form-summary" id="formSummary"></div>
+                    <div id="fieldList" class="field-list"></div>
+                    <div class="form-actions-stack" style="margin-top:16px;">
+                        <button type="button" class="btn btn-secondary btn-block" id="fillEmployer" disabled>Fill selected fields · do not submit</button>
+                        <button type="button" class="btn btn-secondary btn-block" id="fillContinue" disabled hidden>Fill + continue to next step</button>
+                    </div>
+                    <div id="fillResult" class="notice" hidden></div>
+                </div>
+
+                {% if application.status == 'approved' %}
+                <div id="finalSubmissionControls" class="submission-block" hidden>
+                    <div class="submission-warning">
+                        <strong>Explicit final authorization required.</strong>
+                        This sends the application to the employer. Check every answer and attachment first. CAPTCHA and security checks are never bypassed.
+                    </div>
+                    <div class="field">
+                        <label>Type the exact phrase to authorize</label>
+                        <input id="submissionAuthorization" class="input" placeholder="I AUTHORIZE THIS APPLICATION TO BE SUBMITTED">
+                    </div>
+                    <button type="button" class="btn btn-primary btn-block" id="submitExternal" disabled>Confirm & submit</button>
+                </div>
+                {% endif %}
+            </div>
         </div>
 
-        <!-- Export tools -->
-        <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-            <a class="btn btn-secondary btn-block" href="/application/{{application.id}}/cv.docx">Download CV · DOCX</a>
-            <a class="btn btn-secondary btn-block" href="/application/{{application.id}}/cv.pdf">Download CV · PDF</a>
-            <a class="btn btn-secondary btn-block" href="/application/{{application.id}}/email.eml">Email draft · EML</a>
+        <div class="export-row">
+            <a class="export-btn" href="/application/{{application.id}}/cv.docx">CV · DOCX</a>
+            <a class="export-btn" href="/application/{{application.id}}/cv.pdf">CV · PDF</a>
+            <a class="export-btn" href="/application/{{application.id}}/email.eml">Email · EML</a>
         </div>
 
-        <!-- Screening questions -->
-        <form method="post" action="/application/{{application.id}}/form-pack" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-            <div class="field">
-                <label>Google form / ATS screening questions</label>
-                <textarea name="questions" rows="4" placeholder="Paste screening questions here, one per line."></textarea>
+        <div class="panel">
+            <div class="panel-header">
+                <h3 class="panel-heading">Screening questions</h3>
             </div>
-            <button class="btn btn-secondary btn-block">Build form response pack</button>
-        </form>
+            <form method="post" action="/application/{{application.id}}/form-pack">
+                <div class="field">
+                    <label>Paste Google Form / ATS questions, one per line</label>
+                    <textarea name="questions" rows="4" placeholder="Why do you want this role?&#10;Describe your experience with..."></textarea>
+                </div>
+                <button class="btn btn-secondary btn-block">Build response pack</button>
+            </form>
+        </div>
 
-        {% if application.status=='draft' %}
-        <!-- Edit draft -->
-        <form method="post" action="/application/{{application.id}}/save" style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border);">
-            <div class="field">
-                <label>Tailored CV / evidence</label>
-                <textarea name="cv_text" rows="12">{{application.cv_text}}</textarea>
-            </div>
-            <div class="field">
-                <label>Role-specific cover letter / email</label>
-                <textarea name="cover_letter" rows="12">{{application.cover_letter}}</textarea>
-            </div>
-            <button class="btn btn-secondary btn-block">Save changes</button>
-        </form>
-
-        <!-- Approve -->
-        <form method="post" action="/application/{{application.id}}/approve" onsubmit="return confirm('Approve this exact application package? This records approval only; it does not submit externally.');" style="margin-top: 12px;">
-            <button class="btn btn-primary btn-block">Approve this application</button>
-        </form>
-        {% endif %}
-
-        {% if application.status=='approved' %}
-        <div class="notice" style="margin-top: 20px;">Approved package. External submission has not occurred. Open the employer application, complete any required fields and submit. Record confirmation below.</div>
-        <a class="btn btn-secondary btn-block" href="{{job.url}}" target="_blank" rel="noopener" style="margin-top: 12px;">Open employer application</a>
-        <form method="post" action="/application/{{application.id}}/submitted" style="margin-top: 12px;">
-            <div class="field">
-                <label>After you have submitted, type this exact phrase</label>
-                <input name="confirmation" placeholder="I CONFIRM I SUBMITTED THIS APPLICATION" required>
-            </div>
-            <button class="btn btn-secondary btn-block">Record confirmed submission</button>
-        </form>
-        {% endif %}
-
-        {% if application.status=='submission_pending_verification' %}
-        <div class="notice notice-warning" style="margin-top: 20px;">Submission may have been sent, but the employer confirmation was not recognised. Do not retry yet.</div>
-        <p style="font-size: 13px; color: var(--text-secondary); margin-top: 12px;">{{application.confirmation}}</p>
-        <a class="btn btn-secondary btn-block" href="{{job.url}}" target="_blank" rel="noopener" style="margin-top: 12px;">Check employer application</a>
+        {% if application.status == 'approved' %}
+        <div class="panel panel-notice">
+            <p class="panel-text"><strong>Approved, not submitted.</strong> The employer form must be completed manually or via the browser assistant. After submitting on the employer site, record the confirmation below.</p>
+            <a href="{{job.url}}" target="_blank" rel="noopener" class="btn btn-secondary btn-block" style="margin-bottom:8px;">Open employer application</a>
+            <form method="post" action="/application/{{application.id}}/submitted">
+                <div class="field">
+                    <label>After submitting, type the exact phrase</label>
+                    <input name="confirmation" placeholder="I CONFIRM I SUBMITTED THIS APPLICATION" required>
+                </div>
+                <button class="btn btn-secondary btn-block">Record confirmed submission</button>
+            </form>
+        </div>
+        {% elif application.status == 'submission_pending_verification' %}
+        <div class="panel panel-warning">
+            <p class="panel-text"><strong>Submission pending verification.</strong> The final control was clicked but the employer's confirmation was not detected. Do not retry yet.</p>
+            <p class="panel-text">{{application.confirmation}}</p>
+            <a href="{{job.url}}" target="_blank" rel="noopener" class="btn btn-secondary btn-block">Check employer application</a>
+        </div>
+        {% elif application.status == 'submitted' %}
+        <div class="panel panel-success">
+            <p class="panel-text"><strong>Submitted.</strong> {{application.confirmation}}</p>
+        </div>
         {% endif %}
 
         {% endif %}
+    </section>
+
+    <section class="zone">
+        <div class="zone-header">
+            <span class="overline">04 / Selected Candidate Assets</span>
+        </div>
+        <div class="panel">
+            <div class="asset-list">
+                {% for a in selected_assets %}
+                <a href="{{a.url}}" target="_blank" rel="noopener" class="asset-row">
+                    <div>
+                        <div class="asset-title">{{a.label}}</div>
+                        <div class="asset-sub">{{a.description}}</div>
+                    </div>
+                    <span class="asset-arrow">↗</span>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
     </section>
 
 </main>
 
 <script>
-const appId={{application.id if application else 'null'}};
-const profile={{profile_json|safe}};
-function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-const inspector=document.getElementById('formInspector');
-const inspectBtn=document.getElementById('inspectEmployer');
-const fillBtn=document.getElementById('fillEmployer');
-const continueBtn=document.getElementById('fillContinue');
-const submitBtn=document.getElementById('submitExternal');
-const submitControls=document.getElementById('finalSubmissionControls');
-const canSubmit={{ 'true' if application and application.status=='approved' else 'false' }};
-let safeNextLabel=''; let finalSubmitLabel=''; let detected=[]; let savedProgress={};
+const appId = {{application.id if application else 'null'}};
+const profile = {{profile_json|safe}};
+const canSubmit = {{ 'true' if application and application.status=='approved' else 'false' }};
 
-function suggest(label){
- const t=(label||'').toLowerCase();
- if(/full.?name|your name/.test(t))return profile.name||'';
- if(/email/.test(t))return profile.email||'';
- if(/phone|mobile/.test(t))return profile.phone||'';
- if(/portfolio|website/.test(t))return profile.portfolio||'';
- if(/github/.test(t))return profile.github||'';
- if(/linkedin/.test(t))return profile.linkedin||'';
- if(/country|location/.test(t))return 'Nigeria';
- if(/resume|cv|cover letter|attachment|upload/.test(t))return '__FILE__';
- return '';
+function esc(v) {
+    return String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-inspectBtn?.addEventListener('click',async()=>{
- const url=document.getElementById('employerUrl').value.trim();
- inspector.innerHTML='<span style="color:var(--text-tertiary);">Inspecting...</span>';fillBtn.disabled=true;
- try{
-  const r=await fetch(`/application/${appId}/inspect-form`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
-  const data=await r.json();if(!r.ok)throw new Error(data.detail||'Inspection failed');
-  detected=data.fields||[];savedProgress=data.saved_progress||{};
-  safeNextLabel=(data.workflow?.next_step_controls||[]).map(x=>x.text).find(t=>/^(next|continue|save and continue|continue to next step)$/i.test(t||''))||'';
-  finalSubmitLabel=(data.workflow?.final_submission_controls||[]).map(x=>x.text).find(t=>/^(submit application|submit|apply|apply now|send application|finish application)$/i.test(t||''))||'';
-  if(submitControls){submitControls.hidden=!(canSubmit&&finalSubmitLabel);submitBtn.disabled=!(canSubmit&&finalSubmitLabel);}
-  continueBtn.hidden=!safeNextLabel;continueBtn.disabled=!safeNextLabel;
-  const stageBox=document.getElementById('workflowStage');stageBox.hidden=false;
-  stageBox.textContent=`Stage: ${(data.workflow?.stage||'application_form').replaceAll('_',' ').toUpperCase()} · ${detected.length} fields detected.`;
-  inspector.innerHTML=detected.map((f,i)=>{
-    const v=suggest(f.label+' '+f.name+' '+f.placeholder);const isFile=f.type==='file';const opts=f.options||[];
-    return `<div class="field" style="padding:12px 0;border-bottom:1px solid var(--border);">
-      <label style="display:flex;align-items:center;gap:8px;text-transform:none;font-size:13px;">
-        <input type="checkbox" class="field-check" data-index="${i}" ${v?'checked':''} ${isFile?'disabled':''}>
-        <span>${esc(f.label||f.name||f.type||'Unlabelled')}</span>
-        ${f.required?'<span style="font-family:var(--font-mono);font-size:10px;color:var(--warning);">REQUIRED</span>':''}
-      </label>
-      ${isFile?'<small style="color:var(--text-tertiary);font-size:11px;">File upload — matched by label.</small>':opts.length?`<select class="field-value input input-sm" data-index="${i}"><option value="">Choose manually…</option>${opts.map(o=>`<option value="${esc(o.label)}">${esc(o.label)}</option>`).join('')}</select>`:`<input class="field-value input input-sm" data-index="${i}" value="${esc(v==='__FILE__'?'':v)}" placeholder="${esc(f.placeholder||'')}">`}
-    </div>`;
-  }).join('');
-  detected.forEach((f,i)=>{const key=f.selector_key||`f${f.frame_index||0}-i${f.index}`;const saved=savedProgress[key];if(saved!==undefined){const el=inspector.querySelector(`.field-value[data-index="${i}"]`);if(el)el.value=saved;}});
-  fillBtn.disabled=false;
- }catch(e){inspector.textContent=e.message}
+document.querySelectorAll('.tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        const target = tab.dataset.tab;
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.querySelector(`.tab-panel[data-panel="${target}"]`).classList.add('active');
+    });
 });
 
-async function prepareForm(advanceLabel=''){
- const field_values=[];
- detected.forEach((f,i)=>{
-  if(f.type==='file')return;
-  const check=inspector.querySelector(`.field-check[data-index="${i}"]`);
-  if(!check?.checked)return;
-  const input=inspector.querySelector(`.field-value[data-index="${i}"]`);
-  if(input&&input.value.trim())field_values.push({index:f.index,frame_index:f.frame_index||0,selector_key:f.selector_key,value:input.value,label:f.label||f.name});
- });
- const progress={};detected.forEach((f,i)=>{const el=inspector.querySelector(`.field-value[data-index="${i}"]`);if(el)progress[f.selector_key||`f${f.frame_index||0}-i${f.index}`]=el.value;});
- await fetch(`/application/${appId}/progress`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({progress:{...savedProgress,...progress}})});
- fillBtn.disabled=true;continueBtn.disabled=true;fillBtn.textContent=advanceLabel?'Filling + advancing…':'Preparing…';
- try{
-  const r=await fetch(`/application/${appId}/fill-form`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:document.getElementById('employerUrl').value.trim(),field_values,advance_button_text:advanceLabel||null})});
-  const d=await r.json();if(!r.ok)throw new Error(d.detail||'Fill failed');
-  const out=document.getElementById('fillResult');out.hidden=false;
-  out.textContent=`Prepared ${d.filled.length} fields. ${d.unfilled.length} need attention. ${d.advanced_to_next_step?'Advanced to next stage.':'No page advance.'} Final submission was not clicked.`;
- }catch(e){const out=document.getElementById('fillResult');out.hidden=false;out.textContent=e.message}
- finally{fillBtn.disabled=false;fillBtn.textContent='Fill selected fields · do not submit';continueBtn.disabled=!safeNextLabel}
+function suggest(label) {
+    const t = (label || '').toLowerCase();
+    if (/full.?name|your name/.test(t)) return profile.name || '';
+    if (/email/.test(t)) return profile.email || '';
+    if (/phone|mobile/.test(t)) return profile.phone || '';
+    if (/portfolio|website/.test(t)) return profile.portfolio || '';
+    if (/github/.test(t)) return profile.github || '';
+    if (/linkedin/.test(t)) return profile.linkedin || '';
+    if (/country|location/.test(t)) return 'Nigeria';
+    if (/resume|cv|cover letter|attachment|upload/.test(t)) return '__FILE__';
+    return '';
 }
 
-fillBtn?.addEventListener('click',()=>prepareForm(''));
-continueBtn?.addEventListener('click',()=>{if(safeNextLabel)prepareForm(safeNextLabel)});
-submitBtn?.addEventListener('click',async()=>{
- const phrase=document.getElementById('submissionAuthorization').value.trim();
- if(phrase!=="I AUTHORIZE THIS APPLICATION TO BE SUBMITTED"){alert('Enter the exact authorization phrase first.');return;}
- if(!confirm('This will send your application to the employer. Have you reviewed every field, document and answer?'))return;
- const field_values=[];
- detected.forEach((f,i)=>{
-  if(f.type==='file')return;
-  const check=inspector.querySelector(`.field-check[data-index="${i}"]`);
-  if(!check?.checked)return;
-  const input=inspector.querySelector(`.field-value[data-index="${i}"]`);
-  if(input&&input.value.trim())field_values.push({index:f.index,frame_index:f.frame_index||0,selector_key:f.selector_key,value:input.value,label:f.label||f.name});
- });
- submitBtn.disabled=true;submitBtn.textContent='Sending to employer…';
- const out=document.getElementById('fillResult');out.hidden=false;out.textContent='Submitting after your explicit authorization…';
- try{
-  const r=await fetch(`/application/${appId}/submit-external`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url:document.getElementById('employerUrl').value.trim(),field_values,final_submit_button_text:finalSubmitLabel,authorization_phrase:phrase})});
-  const d=await r.json();if(!r.ok)throw new Error(d.detail||'Submission failed');
-  out.textContent=d.application_status==='submitted'?'Employer confirmation detected. Application recorded as submitted.':`Submission control was clicked, but confirmation could not be verified. Status: ${d.application_status}. Check the employer site before retrying.`;
-  submitBtn.disabled=true;
- }catch(e){out.textContent=e.message;submitBtn.disabled=false}
+const inspectBtn = document.getElementById('inspectEmployer');
+const inspector = document.getElementById('formInspector');
+const fieldList = document.getElementById('fieldList');
+const formSummary = document.getElementById('formSummary');
+const fillBtn = document.getElementById('fillEmployer');
+const continueBtn = document.getElementById('fillContinue');
+const submitBtn = document.getElementById('submitExternal');
+const submitControls = document.getElementById('finalSubmissionControls');
+
+let detected = [];
+let savedProgress = {};
+let safeNextLabel = '';
+let finalSubmitLabel = '';
+
+inspectBtn?.addEventListener('click', async () => {
+    const url = document.getElementById('employerUrl').value.trim();
+    inspector.hidden = false;
+    fieldList.innerHTML = '<div class="form-loading">Inspecting…</div>';
+    fillBtn.disabled = true;
+
+    try {
+        const r = await fetch(`/application/${appId}/inspect-form`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({url})
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || 'Inspection failed');
+
+        detected = data.fields || [];
+        savedProgress = data.saved_progress || {};
+
+        safeNextLabel = (data.workflow?.next_step_controls || [])
+            .map(x => x.text)
+            .find(t => /^(next|continue|save and continue|continue to next step)$/i.test(t || '')) || '';
+
+        finalSubmitLabel = (data.workflow?.final_submission_controls || [])
+            .map(x => x.text)
+            .find(t => /^(submit application|submit|apply|apply now|send application|finish application)$/i.test(t || '')) || '';
+
+        if (submitControls) {
+            submitControls.hidden = !(canSubmit && finalSubmitLabel);
+            if (submitBtn) submitBtn.disabled = !(canSubmit && finalSubmitLabel);
+        }
+
+        continueBtn.hidden = !safeNextLabel;
+        continueBtn.disabled = !safeNextLabel;
+
+        const stageBox = document.getElementById('workflowStage');
+        stageBox.hidden = false;
+        stageBox.textContent = `Stage: ${(data.workflow?.stage || 'application_form').replaceAll('_', ' ').toUpperCase()} · ${detected.length} fields detected`;
+
+        formSummary.textContent = `${data.ats?.toUpperCase() || 'GENERIC'} · ${detected.length} fields`;
+
+        fieldList.innerHTML = detected.map((f, i) => {
+            const v = suggest(f.label + ' ' + f.name + ' ' + f.placeholder);
+            const isFile = f.type === 'file';
+            const opts = f.options || [];
+
+            return `<div class="field-row">
+                <label class="field-row-label">
+                    <input type="checkbox" class="field-check" data-index="${i}" ${v ? 'checked' : ''} ${isFile ? 'disabled' : ''}>
+                    <span class="field-row-name">${esc(f.label || f.name || f.type || 'Unlabelled')}</span>
+                    ${f.required ? '<span class="field-required">REQUIRED</span>' : ''}
+                </label>
+                ${isFile
+                    ? '<div class="field-row-hint">File upload — matched by label</div>'
+                    : opts.length
+                        ? `<select class="field-value input input-sm" data-index="${i}"><option value="">Choose…</option>${opts.map(o => `<option value="${esc(o.label)}">${esc(o.label)}</option>`).join('')}</select>`
+                        : `<input class="field-value input input-sm" data-index="${i}" value="${esc(v === '__FILE__' ? '' : v)}" placeholder="${esc(f.placeholder || '')}">`
+                }
+            </div>`;
+        }).join('');
+
+        detected.forEach((f, i) => {
+            const key = f.selector_key || `f${f.frame_index || 0}-i${f.index}`;
+            const saved = savedProgress[key];
+            if (saved !== undefined) {
+                const el = fieldList.querySelector(`.field-value[data-index="${i}"]`);
+                if (el) el.value = saved;
+            }
+        });
+
+        fillBtn.disabled = false;
+    } catch (e) {
+        fieldList.innerHTML = `<div class="notice notice-warning">${esc(e.message)}</div>`;
+    }
 });
 
-document.getElementById('auditApplication')?.addEventListener('click',async()=>{
- const box=document.getElementById('auditResult')||inspector;
- try{const r=await fetch(`/application/${appId}/audit`);const d=await r.json();if(!r.ok)throw new Error(d.detail||'Audit failed');
- box.innerHTML=`<div class="notice" style="margin-top:12px;"><strong>Human review ready:</strong> ${d.ready_for_human_review?'Yes':'No'}<br><br><strong>Blockers:</strong> ${(d.blockers||[]).join(' | ')||'None'}<br><strong>Unverified claims:</strong> ${(d.verify_before_use||[]).length}<br><strong>Consistency flags:</strong> ${(d.consistency_flags||[]).join(' | ')||'None'}</div>`;
- }catch(e){box.innerHTML=`<div class="notice notice-warning" style="margin-top:12px;">${e.message}</div>`}
+async function prepareForm(advanceLabel = '') {
+    const field_values = [];
+    detected.forEach((f, i) => {
+        if (f.type === 'file') return;
+        const check = fieldList.querySelector(`.field-check[data-index="${i}"]`);
+        if (!check?.checked) return;
+        const input = fieldList.querySelector(`.field-value[data-index="${i}"]`);
+        if (input && input.value.trim()) {
+            field_values.push({
+                index: f.index,
+                frame_index: f.frame_index || 0,
+                selector_key: f.selector_key,
+                value: input.value,
+                label: f.label || f.name
+            });
+        }
+    });
+
+    const progress = {};
+    detected.forEach((f, i) => {
+        const el = fieldList.querySelector(`.field-value[data-index="${i}"]`);
+        if (el) progress[f.selector_key || `f${f.frame_index || 0}-i${f.index}`] = el.value;
+    });
+    await fetch(`/application/${appId}/progress`, {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({progress: {...savedProgress, ...progress}})
+    });
+
+    fillBtn.disabled = true;
+    continueBtn.disabled = true;
+    fillBtn.textContent = advanceLabel ? 'Filling + advancing…' : 'Preparing…';
+
+    try {
+        const r = await fetch(`/application/${appId}/fill-form`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                url: document.getElementById('employerUrl').value.trim(),
+                field_values,
+                advance_button_text: advanceLabel || null
+            })
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Fill failed');
+
+        const out = document.getElementById('fillResult');
+        out.hidden = false;
+        out.textContent = `Prepared ${d.filled.length} fields. ${d.unfilled.length} need attention. ${d.advanced_to_next_step ? 'Advanced to next stage.' : 'No page advance.'} Final submission was not clicked.`;
+    } catch (e) {
+        const out = document.getElementById('fillResult');
+        out.hidden = false;
+        out.textContent = e.message;
+    } finally {
+        fillBtn.disabled = false;
+        fillBtn.textContent = 'Fill selected fields · do not submit';
+        continueBtn.disabled = !safeNextLabel;
+    }
+}
+
+fillBtn?.addEventListener('click', () => prepareForm(''));
+continueBtn?.addEventListener('click', () => { if (safeNextLabel) prepareForm(safeNextLabel); });
+
+submitBtn?.addEventListener('click', async () => {
+    const phrase = document.getElementById('submissionAuthorization').value.trim();
+    if (phrase !== "I AUTHORIZE THIS APPLICATION TO BE SUBMITTED") {
+        alert('Enter the exact authorization phrase first.');
+        return;
+    }
+    if (!confirm('This will send your application to the employer. Have you reviewed every field, document and answer?')) return;
+
+    const field_values = [];
+    detected.forEach((f, i) => {
+        if (f.type === 'file') return;
+        const check = fieldList.querySelector(`.field-check[data-index="${i}"]`);
+        if (!check?.checked) return;
+        const input = fieldList.querySelector(`.field-value[data-index="${i}"]`);
+        if (input && input.value.trim()) {
+            field_values.push({
+                index: f.index,
+                frame_index: f.frame_index || 0,
+                selector_key: f.selector_key,
+                value: input.value,
+                label: f.label || f.name
+            });
+        }
+    });
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Sending to employer…';
+
+    try {
+        const r = await fetch(`/application/${appId}/submit-external`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                url: document.getElementById('employerUrl').value.trim(),
+                field_values,
+                final_submit_button_text: finalSubmitLabel,
+                authorization_phrase: phrase
+            })
+        });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Submission failed');
+
+        const out = document.getElementById('fillResult');
+        out.hidden = false;
+        out.textContent = d.application_status === 'submitted'
+            ? 'Employer confirmation detected. Application recorded as submitted.'
+            : `Submission control clicked, but confirmation could not be verified. Status: ${d.application_status}. Check the employer site before retrying.`;
+        submitBtn.disabled = true;
+    } catch (e) {
+        const out = document.getElementById('fillResult');
+        out.hidden = false;
+        out.textContent = e.message;
+        submitBtn.disabled = false;
+    }
+});
+
+document.getElementById('auditApplication')?.addEventListener('click', async () => {
+    const box = document.getElementById('auditResult');
+    box.hidden = false;
+    box.innerHTML = '<div class="form-loading">Running audit…</div>';
+    try {
+        const r = await fetch(`/application/${appId}/audit`);
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.detail || 'Audit failed');
+
+        box.innerHTML = `<div class="audit-grid">
+            <div class="audit-item">
+                <span class="audit-label">Human review ready</span>
+                <span class="audit-value ${d.ready_for_human_review ? 'success' : 'warning'}">${d.ready_for_human_review ? 'YES' : 'NO'}</span>
+            </div>
+            <div class="audit-item">
+                <span class="audit-label">Blockers</span>
+                <span class="audit-value">${(d.blockers || []).join(' · ') || 'None'}</span>
+            </div>
+            <div class="audit-item">
+                <span class="audit-label">Unverified claims</span>
+                <span class="audit-value">${(d.verify_before_use || []).length}</span>
+            </div>
+            <div class="audit-item">
+                <span class="audit-label">Consistency flags</span>
+                <span class="audit-value">${(d.consistency_flags || []).join(' · ') || 'None'}</span>
+            </div>
+        </div>`;
+    } catch (e) {
+        box.innerHTML = `<div class="notice notice-warning">${e.message}</div>`;
+    }
 });
 </script>
 </body>
